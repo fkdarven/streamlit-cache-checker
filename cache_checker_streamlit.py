@@ -44,13 +44,12 @@ def check_cache_and_rocket(url, rocket_check=True):
         age_raw = resp.headers.get("age", "N/A")
         age = f"{int(age_raw) // 60} min" if age_raw.isdigit() else age_raw
         rocket = "Rocket" if rocket_check and "Performance optimized by WP Rocket" in html else "-"
-
-                canonical = "-"
-                if '<link rel="canonical"' in html:
-                    start = html.find('<link rel="canonical"')
-                    href_start = html.find('href="', start) + 6
-                    href_end = html.find('"', href_start)
-                    canonical = html[href_start:href_end].strip()
+        canonical = "-"
+        if '<link rel="canonical"' in html:
+            start = html.find('<link rel="canonical"')
+            href_start = html.find('href="', start) + 6
+            href_end = html.find('"', href_start)
+            canonical = html[href_start:href_end].strip()
 
         noindex = "noindex" if '<meta name="robots"' in html and "noindex" in html else "-"
         return status_code, cf_status, age, rocket, elapsed, noindex, canonical
@@ -65,13 +64,12 @@ def check_cache_and_rocket(url, rocket_check=True):
         age_raw = resp.headers.get("age", "N/A")
         age = f"{int(age_raw) // 60} min" if age_raw.isdigit() else age_raw
         rocket = "Rocket" if rocket_check and "Performance optimized by WP Rocket" in html else "-"
-
-                canonical = "-"
-                if '<link rel="canonical"' in html:
-                    start = html.find('<link rel="canonical"')
-                    href_start = html.find('href="', start) + 6
-                    href_end = html.find('"', href_start)
-                    canonical = html[href_start:href_end].strip()
+        canonical = "-"
+        if '<link rel="canonical"' in html:
+            start = html.find('<link rel="canonical"')
+            href_start = html.find('href="', start) + 6
+            href_end = html.find('"', href_start)
+            canonical = html[href_start:href_end].strip()
 
         return status_code, cf_status, age, rocket
     except Exception as e:
