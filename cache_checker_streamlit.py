@@ -50,6 +50,8 @@ if st.button("🔎 Executar Verificação"):
     today = datetime.now().date().isoformat()
     domains = [d.strip() for d in domains_input.strip().splitlines() if d.strip()]
 
+    filtro = st.selectbox("Filtrar por status de saúde:", options=["Todos", "✅ Saudável", "⚠️ Atenção", "❌ Sem cache"])
+
     for domain in domains:
         st.subheader(f"🌐 {domain}")
         base_url = f"https://{domain}"
@@ -81,7 +83,6 @@ if st.button("🔎 Executar Verificação"):
                 })
 
             df = pd.DataFrame(data)
-            filtro = st.selectbox("Filtrar por status de saúde:", options=["Todos", "✅ Saudável", "⚠️ Atenção", "❌ Sem cache"])
             if filtro != "Todos":
                 df = df[df["Saúde"] == filtro]
 
@@ -97,4 +98,4 @@ if st.button("🔎 Executar Verificação"):
                 col3.metric("⚠️ Atenção", atencao)
                 col4.metric("❌ Sem cache", sem_cache)
 
-            st.dataframe(df, use_container_width=True)
+                st.dataframe(df, use_container_width=True)
