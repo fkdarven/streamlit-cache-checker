@@ -44,8 +44,16 @@ def check_cache_and_rocket(url, rocket_check=True):
         age_raw = resp.headers.get("age", "N/A")
         age = f"{int(age_raw) // 60} min" if age_raw.isdigit() else age_raw
         rocket = "Rocket" if rocket_check and "Performance optimized by WP Rocket" in html else "-"
+
+                canonical = "-"
+                if '<link rel="canonical"' in html:
+                    start = html.find('<link rel="canonical"')
+                    href_start = html.find('href="', start) + 6
+                    href_end = html.find('"', href_start)
+                    canonical = html[href_start:href_end].strip()
+
         noindex = "noindex" if '<meta name="robots"' in html and "noindex" in html else "-"
-        return status_code, cf_status, age, rocket, elapsed, noindex
+        return status_code, cf_status, age, rocket, elapsed, noindex, canonical
     except Exception as e:
         return "ERR", "ERR", "ERR", "-", "-", f"Error: {e}"
     
@@ -57,6 +65,14 @@ def check_cache_and_rocket(url, rocket_check=True):
         age_raw = resp.headers.get("age", "N/A")
         age = f"{int(age_raw) // 60} min" if age_raw.isdigit() else age_raw
         rocket = "Rocket" if rocket_check and "Performance optimized by WP Rocket" in html else "-"
+
+                canonical = "-"
+                if '<link rel="canonical"' in html:
+                    start = html.find('<link rel="canonical"')
+                    href_start = html.find('href="', start) + 6
+                    href_end = html.find('"', href_start)
+                    canonical = html[href_start:href_end].strip()
+
         return status_code, cf_status, age, rocket
     except Exception as e:
         return "ERR", "ERR", "ERR", f"Error: {e}"
@@ -79,7 +95,7 @@ if st.button("🔎 Executar Verificação"):
         if check_single:
             st.markdown("**📝 Verificando posts individuais:**")
             for post in posts:
-                status, cf_status, age, rocket, elapsed, noindex = check_cache_and_rocket(post['link'], rocket_check=check_rocket)
+                status, cf_status, age, rocket, elapsed, noindex, canonical = check_cache_and_rocket(post['link'], rocket_check=check_rocket)
                 st.write(f"- {post['link']} → HTTP: {status}, Cache: {cf_status}, Age: {age}, Rocket: {rocket}, Tempo: {elapsed}s, Noindex: {noindex}")
 
         if check_archives:
