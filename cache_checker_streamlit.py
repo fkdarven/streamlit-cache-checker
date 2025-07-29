@@ -116,3 +116,45 @@ if st.button("🔎 Executar Verificação"):
             col4.metric("❌ Sem cache", sem_cache)
 
             st.dataframe(df, use_container_width=True)
+
+
+# Verificação de URLs customizadas (fora dos domínios)
+if custom_urls:
+    st.subheader("🔗 URLs Personalizadas")
+    urls = [u.strip() for u in custom_urls if u.strip()]
+    data_custom = []
+
+    for url in urls:
+        status, cf_status, age, rocket, elapsed, noindex, canonical = check_cache_and_rocket(url, rocket_check=check_rocket)
+
+        if cf_status == "MISS" or age in ("N/A", "0 min"):
+            score = "❌ Sem cache"
+        elif rocket == "-" or noindex != "-" or elapsed == "-" or (elapsed != "-" and float(elapsed) > 1.5):
+            score = "⚠️ Atenção"
+        else:
+            score = "✅ Saudável"
+
+        data_custom.append({
+            "URL": url,
+            "HTTP": status,
+            "Cache": cf_status,
+            "Age": age,
+            "Tempo (s)": elapsed,
+            "Rocket": rocket,
+            "Noindex": noindex,
+            "Canonical": canonical,
+            "Saúde": score
+        })
+
+    df_custom = pd.DataFrame(data_custom)
+    if filtro != "Todos":
+        df_custom = df_custom[df_custom["Saúde"] == filtro]
+
+    if not df_custom.empty:
+        st.markdown("### 📊 Resumo das URLs Avulsas")
+        col1, col2, col3, col4 = st.columns(4)
+        col1.metric("Total de URLs", len(df_custom))
+        col2.metric("✅ Saudáveis", (df_custom["Saúde"] == "✅ Saudável").sum())
+        col3.metric("⚠️ Atenção", (df_custom["Saúde"] == "⚠️ Atenção").sum())
+        col4.metric("❌ Sem cache", (df_custom["Saúde"] == "❌ Sem cache").sum())
+        st.dataframe(df_custom, use_container_width=True)
