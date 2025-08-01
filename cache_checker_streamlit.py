@@ -36,14 +36,17 @@ def check_cache_and_rocket(url, rocket_check=True):
         html = resp.text
         status_code = resp.status_code
         elapsed = round(resp.elapsed.total_seconds(), 2)
+        content_size_kb = round(len(resp.content) / 1024, 1)
         cf_status = resp.headers.get("cf-cache-status", "N/A")
         age_raw = resp.headers.get("age", "N/A")
         age = f"{int(age_raw) // 60} min" if age_raw.isdigit() else age_raw
         rocket = "Rocket" if rocket_check and re.search(r'wp-rocket|Performance optimized by WP Rocket', html, re.IGNORECASE) else "-"
         match = re.search(r'<link rel="canonical" href="([^"]+)"', html)
         canonical = match.group(1) if match else "-"
-        noindex = "noindex" if re.search(r'<meta name="robots"[^>]*content="[^"]*noindex', html) else "-"
-        return status_code, cf_status, age, rocket, elapsed, noindex, canonical
+        noindex = "noindex" if re.search(r'<meta name="robots"[^>]*content="[^\"]*noindex', html) else "-"
+        return status_code, cf_status, age, rocket, elapsed, noindex, canonical, content_size_kb
+    except Exception as e:
+        return "ERR", "ERR", "ERR", "-", "-", f"Erro: {e}", "-", 0.0
     except Exception as e:
         return "ERR", "ERR", "ERR", "-", "-", f"Erro: {e}", "-"
 
@@ -58,7 +61,7 @@ def classify_health(cf_status, age, rocket, noindex, elapsed):
 def process_urls(urls, check_rocket):
     data = []
     for url in urls:
-        status, cf_status, age, rocket, elapsed, noindex, canonical = check_cache_and_rocket(url, rocket_check=check_rocket)
+        status, cf_status, age, rocket, elapsed, noindex, canonical, size_kb = check_cache_and_rocket(url, rocket_check=check_rocket)
         score = classify_health(cf_status, age, rocket, noindex, elapsed)
         data.append({
             "URL": url,
@@ -66,11 +69,13 @@ def process_urls(urls, check_rocket):
             "Cache": cf_status,
             "Age": age,
             "Tempo (s)": elapsed,
+            "Tamanho (KB)": size_kb,
             "Rocket": rocket,
             "Noindex": noindex,
             "Canonical": canonical,
             "Saúde": score
         })
+    return pd.DataFrame(data)
     return pd.DataFrame(data)
 
 # Execute
