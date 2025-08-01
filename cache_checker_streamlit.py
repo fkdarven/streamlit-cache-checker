@@ -40,7 +40,7 @@ def check_cache_and_rocket(url, rocket_check=True):
         age_raw = resp.headers.get("age", "N/A")
         age = f"{int(age_raw) // 60} min" if age_raw.isdigit() else age_raw
         rocket = "Rocket" if rocket_check and re.search(r'wp-rocket|Performance optimized by WP Rocket', html, re.IGNORECASE) else "-"
-        match = re.search(r'<link rel="canonical" href="([^"]+)", html)
+        match = re.search(r'<link rel="canonical" href="([^"]+)"', html)
         canonical = match.group(1) if match else "-"
         noindex = "noindex" if re.search(r'<meta name="robots"[^>]*content="[^"]*noindex', html) else "-"
         return status_code, cf_status, age, rocket, elapsed, noindex, canonical
